@@ -3,7 +3,7 @@
 #* DESARROLLADOR: Necrovalle
 #* VERSION: 0.1alpha
 #* REPOSITORIO:
-#* <URL de gitHub>
+#* URL: https://github.com/Necrovalle/llenadora
 #* Notas: libreria del serial: pip install pyserial
 #*******************************************************************************
 
@@ -16,15 +16,35 @@ import datetime
 import serial
 
 #*********************************** DECLARACIONES E INICIALIZACION DE VARIABLES
-ser = serial.Serial('COM4')  # open serial port
+ser = serial.Serial('COM19')  # open serial port
+f_config = open('times.cnf','r')
 ENT = 'O'   #buffer de la lectura serial
-T_A = 6     #Tiempo en segundos de llenado de la linea A
-T_B = 6     #Tiempo en segundos de llenado de la linea B
-Ta_A = 0    #Tiempo actual en la linea A
-Ta_B = 0    #Tiempo actual en la linea A
+T_A = 5     #Tiempo en segundos de llenado de la linea A
+T_B = 5     #Tiempo en segundos de llenado de la linea B
+T_a = 8     #Tiempo en segundos de descarga de la linea A
+T_b = 8     #Tiempo en segundos de descarga de la linea B
+Ta = 0      #Tiempo actual
+Tfin = 0    #Tiempo actual guardado en pausa
 ACT = False #Estado del sistema
+INIT= False #Inicailización
+FIN = False #Apagado del sistema (Pausa)
+RT  = 0     #Estado de interrupcion de operacion 
 
 #************************************************************* FUNCIONES PROPIAS
+def CargarCNF():
+    global T_A
+    global T_B
+    global T_a
+    global T_b
+    Data = f_config.read()
+    DT = Data.split('\n')
+    T_A = int(DT[0])
+    T_B = int(DT[1])
+    T_a = int(DT[2])
+    T_b = int(DT[3])
+    f_config.close()
+    #print(DT[0])
+    
 def Conexion(): 
     ser.write(b'I')
     CON = 1
@@ -43,8 +63,13 @@ def clock():
     global ACT
     global T_A
     global T_B
-    global Ta_A
-    global Ta_B
+    global Ta
+    global Ta_a
+    global Ta_b
+    global INIT
+    global RT
+    global Tfin
+    global FIN
     date_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     lbl5.config(text = date_time)
     if ser.inWaiting()>0:
@@ -52,21 +77,66 @@ def clock():
         if ENT == b'1':
             if ACT == False:
                 ACT = True
-                Ta_A = 0
-                Ta_B = 0
+                Ta = 0
                 #calcular tiempos
         elif ENT == b'0':
             ACT = False
+            FIN = True
     else:
         ENT = 'O'
     if ACT == True:
-        if Ta_A == 0:
-            ser.write(b'a')
-        elif Ta_A == T_A:
+        if INIT == False:
             ser.write(b'A')
-        Ta_A += 1
-        if Ta_A > 2*T_A:
-            Ta_A = 0
+            Ta += 1
+            if Ta == T_A:
+                ser.write(b'X')
+                INIT = True
+                Ta = 0
+        else:
+            if FIN == True:
+                Ta = Tfin
+                if RT == 1:
+                    ser.write(b'a')
+                    time.sleep(0.1)
+                    ser.write(b'B')
+                if RT == 2:
+                    ser,write(b'Y')
+                if RT == 3:
+                    ser.write(b'A')
+                    time.sleep(0.1)
+                    ser.write(b'b')
+                if RT == 4:
+                    ser.write(b'X')
+                FIN = False
+            if Ta == 0:
+                ser.write(b'a')
+                time.sleep(0.1)
+                ser.write(b'B')
+            if Ta == T_B:
+                ser.write(b'Y')
+            if Ta == T_a:
+                ser.write(b'A')
+                time.sleep(0.1)
+                ser.write(b'b')
+            if Ta == T_a +T_A:
+                ser.write(b'X')
+            Ta += 1
+            if Ta == T_a + T_b:
+                Ta = 0
+    else:
+        if FIN == True:
+            Tfin = Ta
+            ser.write(b'X')
+            ser.write(b'Y')
+            if Ta > 0 and Ta <= T_B:
+                RT = 1
+            elif Ta > T_B and Ta <= T_a:
+                RT = 2
+            elif Ta > T_a and Ta <= T_a +T_A:
+                RT = 3
+            elif Ta > T_a + T_A:
+                RT = 4
+            #print(RT)
     lbl5.after(1000, clock)
 
 #******************************************************** CREACION DE LA VENTANA
@@ -100,6 +170,7 @@ lbl_img.place(x=740, y=410)
 lbl5.place(x=10, y=467)
 
 #************************************************************* MANEJO DE VENTANA
+CargarCNF()
 time.sleep(2)
 Conexion()
 clock()
