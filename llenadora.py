@@ -1,7 +1,7 @@
 #*******************************************************************************
 #* INTERFACE GRAFICA DE CONTROL DE LLENADO DE CUBETAS
 #* DESARROLLADOR: Necrovalle
-#* VERSION: 0.1alpha
+#* VERSION: 0.2alpha
 #* REPOSITORIO:
 #* URL: https://github.com/Necrovalle/llenadora
 #* Notas: libreria del serial: pip install pyserial
@@ -16,8 +16,9 @@ import datetime
 import serial
 
 #*********************************** DECLARACIONES E INICIALIZACION DE VARIABLES
-ser = serial.Serial('COM19')  # open serial port
+ser = serial.Serial('COM4')  # open serial port
 f_config = open('times.cnf','r')
+date_time=""#fecha y hora actual
 ENT = 'O'   #buffer de la lectura serial
 T_A = 5     #Tiempo en segundos de llenado de la linea A
 T_B = 5     #Tiempo en segundos de llenado de la linea B
@@ -29,6 +30,9 @@ ACT = False #Estado del sistema
 INIT= False #Inicailización
 FIN = False #Apagado del sistema (Pausa)
 RT  = 0     #Estado de interrupcion de operacion 
+CONT= 0     #Contador general de cubetas llenadas
+HistF=""    #Archivo de historial
+
 
 #************************************************************* FUNCIONES PROPIAS
 def CargarCNF():
@@ -43,7 +47,26 @@ def CargarCNF():
     T_a = int(DT[2])
     T_b = int(DT[3])
     f_config.close()
-    #print(DT[0])
+    
+def regitro_cubeta():
+    lbl4.config(text = str(CONT))
+    HistF.write(date_time)
+    HistF.write(", ")
+    HistF.write(str(CONT))
+    HistF.write("\n")
+
+def crear_historia():
+    global HistF
+    DAT_NAM = date_time.replace("/","_")
+    DAT_NAM = DAT_NAM.replace(" ","-")
+    DAT_NAM = "H-" + DAT_NAM.replace(":","_") + ".txt"
+    HistF = open(DAT_NAM,'w')
+    HistF.write("Histórico de llenado de cubetas Deprochem \n")
+    HistF.write("  Fecha  -  Hora, Número\n")
+    #HistF.close()
+    
+    
+    
     
 def Conexion(): 
     ser.write(b'I')
@@ -70,6 +93,9 @@ def clock():
     global RT
     global Tfin
     global FIN
+    global CONT
+    global date_time
+    global HistF
     date_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     lbl5.config(text = date_time)
     if ser.inWaiting()>0:
@@ -78,10 +104,16 @@ def clock():
             if ACT == False:
                 ACT = True
                 Ta = 0
-                #calcular tiempos
+                crear_historia()
+                lbl2.config(fg = "green")
+                lbl2.config(text = "Activo")
         elif ENT == b'0':
+            #revisar multicierre
+            lbl2.config(fg = "red")
+            lbl2.config(text = "Inactivo")
             ACT = False
             FIN = True
+            HistF.close()
     else:
         ENT = 'O'
     if ACT == True:
@@ -110,6 +142,8 @@ def clock():
                 FIN = False
             if Ta == 0:
                 ser.write(b'a')
+                CONT = CONT + 1
+                regitro_cubeta()
                 time.sleep(0.1)
                 ser.write(b'B')
             if Ta == T_B:
@@ -118,6 +152,8 @@ def clock():
                 ser.write(b'A')
                 time.sleep(0.1)
                 ser.write(b'b')
+                CONT = CONT + 1
+                regitro_cubeta()
             if Ta == T_a +T_A:
                 ser.write(b'X')
             Ta += 1
