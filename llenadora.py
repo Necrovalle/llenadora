@@ -177,12 +177,12 @@ def clock():
 
 #******************************************************** CREACION DE LA VENTANA
 window = Tk()
-window.geometry('1250x550')
+window.geometry('1020x590')
 window.resizable(False, False)
 window.title('Control de llenadora')
 img = PhotoImage(file="logoDeprochem.png")
 
-lbl0 = Label(window, text='Control de llenado de cubetas con datalogger')
+lbl0 = Label(window, text='Control de llenado de cubetas')
 lbl0.config(font=("Verdana 36 bold"))
 lbl1 = Label(window, text='Sistema:')
 lbl1.config(font=("Verdana 36 bold"))
@@ -202,8 +202,8 @@ lbl1.place(x=400, y=150)
 lbl2.place(x=640, y=150)
 lbl3.place(x=94, y=300)
 lbl4.place(x=640, y=300)
-lbl_img.place(x=740, y=410)
-lbl5.place(x=10, y=467)
+lbl_img.place(x=740, y=380)
+lbl5.place(x=10, y=427)
 
 #************************************************************* MANEJO DE VENTANA
 CargarCNF()
