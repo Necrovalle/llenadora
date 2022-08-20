@@ -30,10 +30,10 @@ void setup() {
   pinMode(13, OUTPUT);
   pinMode(pON, INPUT);
   pinMode(pOF, INPUT);
-  digitalWrite(A, LOW);
-  digitalWrite(a, LOW);
-  digitalWrite(B, LOW);
-  digitalWrite(b, LOW);
+  digitalWrite(A, HIGH);
+  digitalWrite(a, HIGH);
+  digitalWrite(B, HIGH);
+  digitalWrite(b, HIGH);
   digitalWrite(13, HIGH);
   ACT = false;
   delay(800);
@@ -42,14 +42,14 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(pON)){
+  if (!digitalRead(pON)){
     if (!ACT){
       Serial.print('1');
       ACT = true;
     }
   }
 
-  if (digitalRead(pOF)){
+  if (!digitalRead(pOF)){
     if (ACT){
       Serial.print('0');
       ACT = false;
@@ -61,28 +61,28 @@ void loop() {
     ENT = Serial.read();
     switch (ENT){
       case 'A':
-        digitalWrite(A, HIGH);
-        digitalWrite(a, LOW);
-        break;
-      case 'a':
         digitalWrite(A, LOW);
         digitalWrite(a, HIGH);
         break;
-      case 'X':
-        digitalWrite(A, LOW);
+      case 'a':
+        digitalWrite(A, HIGH);
         digitalWrite(a, LOW);
         break;
-      case 'B':
-        digitalWrite(B, HIGH);
-        digitalWrite(b, LOW);
+      case 'X':
+        digitalWrite(A, HIGH);
+        digitalWrite(a, HIGH);
         break;
-      case 'b':
+      case 'B':
         digitalWrite(B, LOW);
         digitalWrite(b, HIGH);
         break;
-      case 'Y':
-        digitalWrite(B, LOW);
+      case 'b':
+        digitalWrite(B, HIGH);
         digitalWrite(b, LOW);
+        break;
+      case 'Y':
+        digitalWrite(B, HIGH);
+        digitalWrite(b, HIGH);
         break;
       default:
         Serial.print(ENT);
@@ -92,4 +92,4 @@ void loop() {
   }
 }
 
-/************************************************* FIN  DE CODIGO
+//************************************************* FIN  DE CODIGO
