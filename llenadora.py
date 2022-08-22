@@ -1,7 +1,7 @@
 #*******************************************************************************
 #* INTERFACE GRAFICA DE CONTROL DE LLENADO DE CUBETAS
 #* DESARROLLADOR: Necrovalle
-#* VERSION: 0.2alpha
+#* VERSION: 0.8alpha
 #* REPOSITORIO:
 #* URL: https://github.com/Necrovalle/llenadora
 #* Notas: libreria del serial: pip install pyserial
