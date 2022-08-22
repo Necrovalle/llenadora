@@ -14,6 +14,7 @@ from tkinter import messagebox
 import time
 import datetime
 import serial
+import subprocess
 
 #*********************************** DECLARACIONES E INICIALIZACION DE VARIABLES
 ser = serial.Serial('COM4')  # open serial port
@@ -114,6 +115,9 @@ def clock():
             ACT = False
             FIN = True
             HistF.close()
+        elif ENT == b'F':
+            lbl0.config(text = "Apagando sistema")
+            subprocess.run('shutdown -s')
     else:
         ENT = 'O'
     if ACT == True:
@@ -177,33 +181,34 @@ def clock():
 
 #******************************************************** CREACION DE LA VENTANA
 window = Tk()
-window.geometry('1020x590')
+window.geometry('1024x590+0+0')
 window.resizable(False, False)
 window.title('Control de llenadora')
+window.iconbitmap('Icons_Elec.ico')
 img = PhotoImage(file="logoDeprochem.png")
 
 lbl0 = Label(window, text='Control de llenado de cubetas')
-lbl0.config(font=("Verdana 36 bold"))
+lbl0.config(font=("Verdana 42 bold"))
 lbl1 = Label(window, text='Sistema:')
-lbl1.config(font=("Verdana 36 bold"))
+lbl1.config(font=("Verdana 40 bold"))
 lbl2 = Label(window, text='Inactivo')
-lbl2.config(font=("Verdana 36 bold"), fg="red")
+lbl2.config(font=("Verdana 40 bold"), fg="red")
 lbl3 = Label(window, text='Numero de cubetas:')
-lbl3.config(font=("Verdana 36 bold"))
+lbl3.config(font=("Verdana 40 bold"))
 lbl4 = Label(window, text='0')
-lbl4.config(font=("Verdana 36 bold"), fg="red")
+lbl4.config(font=("Verdana 40 bold"), fg="red")
 lbl_img = Label(window, image=img)
 lbl5 = Label(window, text="00/00/0000 00:00:00")
-lbl5.config(font=("Verdana 32"))
+lbl5.config(font=("Verdana 34"))
 
 
-lbl0.place(x=10, y=10)
-lbl1.place(x=400, y=150)
-lbl2.place(x=640, y=150)
-lbl3.place(x=94, y=300)
-lbl4.place(x=640, y=300)
-lbl_img.place(x=740, y=380)
-lbl5.place(x=10, y=427)
+lbl0.place(x=30, y=10)
+lbl1.place(x=240, y=140)
+lbl2.place(x=520, y=140)
+lbl3.place(x=30, y=270)
+lbl4.place(x=640, y=270)
+lbl_img.place(x=520, y=450)
+lbl5.place(x=30, y=410)
 
 #************************************************************* MANEJO DE VENTANA
 CargarCNF()
