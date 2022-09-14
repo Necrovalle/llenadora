@@ -12,14 +12,18 @@
 //Botones de accion
 #define pON 7
 #define pOF 8
+#define sOF 9
 
 //Nota.- Las señales seran 'A' para cargar A, 'a' par descargar A
 //       'X' para cerrar A, 'B' para cargar B, 'b' para descargar 
 //       B, 'Y' para cerrar B, paramandar al maestro la señal de
-//       activacion es de '1' y un '0' para apagar
+//       activacion es de '1' y un '0' para apagar, envia una F
+//       para apagar el sistema completo.
 
 char    ENT;  //lectura de comando del maestro por puerto serie
-boolean ACT;  //Estado del sitema activo/inactivo 
+boolean ACT;  //Estado del sitema activo/inactivo
+boolean END;  //Bandera de envio de apagado total
+int     Td;   //Tiempo de espera de rebote e inductivos [ms]
 
 void setup() {
   Serial.begin(9600);
@@ -30,12 +34,15 @@ void setup() {
   pinMode(13, OUTPUT);
   pinMode(pON, INPUT);
   pinMode(pOF, INPUT);
+  pinMode(sOF, INPUT);
   digitalWrite(A, HIGH);
   digitalWrite(a, HIGH);
   digitalWrite(B, HIGH);
   digitalWrite(b, HIGH);
   digitalWrite(13, HIGH);
   ACT = false;
+  END = false;
+  Td = 100;
   delay(800);
   digitalWrite(13, LOW);
   
@@ -44,15 +51,39 @@ void setup() {
 void loop() {
   if (!digitalRead(pON)){
     if (!ACT){
-      Serial.print('1');
-      ACT = true;
+      delay(Td);
+      if (!digitalRead(pON)){
+        Serial.print('1');
+        ACT = true; 
+      }
     }
   }
 
   if (!digitalRead(pOF)){
     if (ACT){
-      Serial.print('0');
-      ACT = false;
+      delay(Td);
+      if (!digitalRead(pOF)){
+        Serial.print('0');
+        ACT = false;
+        END = false;
+      }
+    }
+  }
+
+  if (!digitalRead(sOF)){
+    if (END == false){
+      delay(Td);
+      if (!digitalRead(sOF)){
+        digitalWrite(A, HIGH);
+        digitalWrite(a, HIGH);
+        digitalWrite(B, HIGH);
+        digitalWrite(b, HIGH);
+        ACT = false;
+        Serial.print('0');
+        delay(1000);
+        END = true;
+        Serial.print('F');
+      }
     }
   }
   
