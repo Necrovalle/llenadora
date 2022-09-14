@@ -1,7 +1,7 @@
 #*******************************************************************************
 #* INTERFACE GRAFICA DE CONTROL DE LLENADO DE CUBETAS
 #* DESARROLLADOR: Necrovalle
-#* VERSION: 0.8alpha
+#* VERSION: 0.9alpha
 #* REPOSITORIO:
 #* URL: https://github.com/Necrovalle/llenadora
 #* Notas: libreria del serial: pip install pyserial
@@ -118,6 +118,8 @@ def clock():
         elif ENT == b'F':
             lbl0.config(text = "Apagando sistema")
             subprocess.run('shutdown -s')
+            ser.close()
+            
     else:
         ENT = 'O'
     if ACT == True:
@@ -136,7 +138,7 @@ def clock():
                     time.sleep(0.1)
                     ser.write(b'B')
                 if RT == 2:
-                    ser,write(b'Y')
+                    ser.write(b'Y')
                 if RT == 3:
                     ser.write(b'A')
                     time.sleep(0.1)
@@ -207,7 +209,7 @@ lbl1.place(x=240, y=140)
 lbl2.place(x=520, y=140)
 lbl3.place(x=30, y=270)
 lbl4.place(x=640, y=270)
-lbl_img.place(x=520, y=450)
+lbl_img.place(x=515, y=440)
 lbl5.place(x=30, y=410)
 
 #************************************************************* MANEJO DE VENTANA
